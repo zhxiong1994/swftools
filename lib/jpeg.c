@@ -5,6 +5,12 @@
 #include "../config.h"
 
 #ifdef HAVE_JPEGLIB
+#ifndef FALSE 
+#define FALSE 0 
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
 #define HAVE_BOOLEAN
 #include <jpeglib.h>
 

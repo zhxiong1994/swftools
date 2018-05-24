@@ -222,7 +222,7 @@ TAG *MovieAddFrame(SWF * swf, TAG * t, char *sname, int id, int imgidx)
 
     GifFileType *gft;
     FILE *fi;
-
+    int Error;
     if ((fi = fopen(sname, "rb")) == NULL) {
         if (VERBOSE(1))
             fprintf(stderr, "Read access failed: %s\n", sname);
@@ -230,13 +230,13 @@ TAG *MovieAddFrame(SWF * swf, TAG * t, char *sname, int id, int imgidx)
     }
     fclose(fi);
 
-    if ((gft = DGifOpenFileName(sname)) == NULL) {
+    if ((gft = DGifOpenFileName(sname, &Error)) == NULL) {
         fprintf(stderr, "%s is not a GIF file!\n", sname);
         return t;
     }
 
     if (DGifSlurp(gft) != GIF_OK) {
-        PrintGifError();
+        //PrintGifError();
         return t;
     }
 
@@ -455,7 +455,7 @@ TAG *MovieAddFrame(SWF * swf, TAG * t, char *sname, int id, int imgidx)
 
     free(pal);
     free(imagedata);
-    DGifCloseFile(gft);
+    DGifCloseFile(gft, &Error);
 
     return t;
 }
@@ -487,8 +487,8 @@ int CheckInputFile(char *fname, char **realname)
         }
     }
     fclose(fi);
-
-    if ((gft = DGifOpenFileName(s)) == NULL) {
+    int Error;//Add a para.
+    if ((gft = DGifOpenFileName(s, &Error)) == NULL) {
         fprintf(stderr, "%s is not a GIF file!\n", fname);
         return -1;
     }
@@ -499,7 +499,7 @@ int CheckInputFile(char *fname, char **realname)
         global.max_image_height = gft->SHeight;
 
     if (DGifSlurp(gft) != GIF_OK) { 
-        PrintGifError();
+        //PrintGifError();
         return -1;
     }
     // After DGifSlurp() call, gft->ImageCount become available
@@ -518,7 +518,7 @@ int CheckInputFile(char *fname, char **realname)
             fprintf(stderr, "frame: %u, delay: %.3f sec\n", i + 1, getGifDelayTime(gft, i) / 100.0);
     }
 
-    DGifCloseFile(gft);
+    DGifCloseFile(gft, &Error);
 
     return 0;
 }
@@ -700,3 +700,15 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+
+//Add a function. 2015-08-18.
+//Same as fprintf to stderr but with optional print.
+// void
+// PrintGifError() {
+     // const char *Err = GifErrorString(ErrorCode);
+     // if (Err != NULL)
+     //     fprintf(stderr, "GIF-LIB error: %s.\n", Err);
+     // else
+     //     fprintf(stderr, "GIF-LIB undefined error %d.\n", ErrorCode);
+// }
